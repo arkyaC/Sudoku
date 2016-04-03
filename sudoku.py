@@ -1,6 +1,6 @@
 '''
 This is an interactive sudoku game
-Author: @rkyaC
+Author: arkyaC
 Date of Creation: 3rd April 2k16
 '''
 
