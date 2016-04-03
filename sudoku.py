@@ -107,7 +107,7 @@ def isSafe(board,row,col,num):
 
 def makeSpaces(displayedBoard,board):
 	ctr=0
-	while ctr<50: #make 50 (1) empty cells
+	while ctr<50: #make 50 empty cells
 		for i in range(0,9):
 			a=random.randint(0,8)
 			while displayedBoard[i][a]==0:
@@ -172,4 +172,6 @@ def welcomeScr():
 def printBoard(board):
 	for i in range(0,9):
 		print board[i]
-main()
+
+if __name__ == '__main__':
+    main()
