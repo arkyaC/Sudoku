@@ -37,9 +37,9 @@ def main():
 	DISPLAYSURF=pygame.display.set_mode((WINDOWHEIGHT,WINDOWWIDTH))
 	pygame.display.set_caption('Sudoku Masters')
 	global smallFont
-	smallFont=pygame.font.Font('./fonts/arial.ttf',16)
+	smallFont=pygame.font.Font('./arial.ttf',16)
 	global largeFont
-	largeFont=pygame.font.Font('./fonts/arial.ttf',28)
+	largeFont=pygame.font.Font('./arial.ttf',28)
 	largeFont.set_italic(True)
 	print 'init done'
 
