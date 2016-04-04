@@ -31,11 +31,12 @@ PURPLE   = (255,   0, 255)
 CYAN     = (  0, 255, 255)
 BLACK    = (  0,   0,   0)
 
-BOXCOLOUR = GREEN
+BOXCOLOUR = GRAY
 HIGHLIGHT = CYAN
-CLICKED = GREEN
+CLICKED = BLUE
 BGCOLOUR = NAVYBLUE
 TEXTCOLOUR = BLACK
+ORIGINAL = (128, 128, 255)
 
 pygame.init()
 
@@ -49,12 +50,12 @@ largeFont=pygame.font.Font('./arial.ttf',28)
 largeFont.set_italic(True)
 
 
-def first():
-	global FPSCLOCK, DISPLAYSURF
+def main():
+	#global FPSCLOCK, DISPLAYSURF
 	
-	global smallFont
+	#global smallFont
 	
-	global largeFont
+	#global largeFont
 	print 'init done'
 
 
@@ -71,21 +72,22 @@ def first():
 	#print 'filled up'
 
 	displayedBoard = deepcopy(board)
-	#makeSpaces(displayedBoard,board)
-	displayedBoard[0][0]=0
+	makeSpaces(displayedBoard,board)
+	originalBoard = deepcopy(displayedBoard)
+	#displayedBoard[0][0]=0
 	printBoard( displayedBoard)
 	printBoard(board)
-	print "stage 1 complete"
+	#print "stage 1 complete"
 
 	
 	welcomeScr()
 	DISPLAYSURF.fill(BGCOLOUR)
 
 	while True:
-		#mouseClicked = False
+		mouseClicked = False
 		#print 1
 		DISPLAYSURF.fill(BGCOLOUR) # drawing the window
-		displayCurrent(displayedBoard)
+		displayCurrent(displayedBoard,originalBoard)
 		#displayCurrent(board)
 
 		for event in pygame.event.get():
@@ -99,9 +101,16 @@ def first():
 			elif event.type==MOUSEBUTTONUP:
 				mousex,mousey=event.pos
 				mouseClicked=True
+
+		row,col = getBoxAtPixel(mousex,mousey)
+
+		if row!=None and col!=None:
+			if displayedBoard[row][col]==0:
+				highLight(row,col,displayedBoard,originalBoard)
+			if mouseClicked==True:
+				print 1
 		pygame.display.update()
 		FPSCLOCK.tick(FPS)
-
 
 def fillUp(board):
 	box = [0,0]
@@ -131,6 +140,7 @@ def isSafe(board,row,col,num):
 def makeSpaces(displayedBoard,board):
 	ctr=0
 	while ctr<50: #make 50 empty cells
+		print ctr
 		for i in range(0,9):
 			a=random.randint(0,8)
 			while displayedBoard[i][a]==0:
@@ -140,6 +150,7 @@ def makeSpaces(displayedBoard,board):
 			if not unique(displayedBoard):
 				displayedBoard[i][a]=board[i][a]
 				ctr-=1
+				print 1
 		for i in range(0,9):
 			a=random.randint(0,8)
 			while displayedBoard[a][i]==0:
@@ -154,6 +165,7 @@ def unique(displayedBoard):
 	testBoard=displayedBoard
 	if not fillUp(testBoard):
 		return False
+		#print 1
 	board1=displayedBoard
 	board2=displayedBoard
 	fillUp(board1)
@@ -192,24 +204,64 @@ def welcomeScr():
 	DISPLAYSURF.fill(BGCOLOUR)
 	pygame.display.update()
 
-def displayCurrent(board):
+def displayCurrent(board,originalBoard):
 	for row in range(9):
 		for col in range(9):
 			if board[row][col]!=0:
-				pygame.draw.rect(DISPLAYSURF,CLICKED,(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row,BOXEFF,BOXEFF))
+				currBox=pygame.Rect(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row,BOXEFF,BOXEFF)
+				if originalBoard[row][col]==0:
+					pygame.draw.rect(DISPLAYSURF,CLICKED,currBox)
+				else:
+					pygame.draw.rect(DISPLAYSURF,ORIGINAL,currBox)
 				data=smallFont.render(str(board[row][col]),True,TEXTCOLOUR)
 				dataRect=data.get_rect()
-				dataRect.topleft=(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row)
+				dataRect.center=currBox.center
 				DISPLAYSURF.blit(data,dataRect)
 			else:
 				pygame.draw.rect(DISPLAYSURF,BOXCOLOUR,(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row,BOXEFF,BOXEFF))
-
+	for row in range(8):
+		width=2
+		if row==2 or row==5:
+			width=4
+		pygame.draw.line(DISPLAYSURF,PURPLE,(LEFTMARGIN,TOPMARGIN+(row+1)*BOXSIZE),(WINDOWWIDTH-LEFTMARGIN,TOPMARGIN+(row+1)*BOXSIZE),width)
+	for col in range(9):
+		width=2
+		if col==2 or col==5:
+			width=4
+		pygame.draw.line(DISPLAYSURF,PURPLE,(LEFTMARGIN+(col+1)*BOXSIZE,TOPMARGIN),(LEFTMARGIN+(col+1)*BOXSIZE,WINDOWHEIGHT-TOPMARGIN),width)
 	pygame.display.update()
+
+def leftTopCoordsOfBox(boxx, boxy):
+	left=LEFTMARGIN+boxx*BOXSIZE+BOXMARGIN
+	top=TOPMARGIN+boxy*BOXSIZE+BOXMARGIN
+	return (left,top)
+
+def getBoxAtPixel(x,y):
+	for row in range(9):
+		for col in range(9):
+			left, top = leftTopCoordsOfBox(col, row)
+        	boxRect = pygame.Rect(left,top,BOXEFF,BOXEFF)
+        	if boxRect.collidepoint(x, y):
+        	    return (row, col)
+	return (None,None)
+
+def highLight(row,col,displayedBoard,originalBoard):
+	#pygame.draw.rect(DISPLAYSURF,HIGHLIGHT,(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row,BOXEFF,BOXEFF))
+	if originalBoard[row][col]!=0:
+		return
+	currBox=pygame.Rect(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row,BOXEFF,BOXEFF)
+	pygame.draw.rect(DISPLAYSURF,HIGHLIGHT,currBox)
+	if displayedBoard[row][col]==0:
+		return
+	data=smallFont.render(str(board[row][col]),True,TEXTCOLOUR)
+	dataRect=data.get_rect()
+	dataRect.center=currBox.center
+	DISPLAYSURF.blit(data,dataRect)
+
 
 def printBoard(board):
 	for i in range(0,9):
 		print board[i]
 
-'''if __name__ == '__main__':
-    main()'''
-first()
+if __name__ == '__main__':
+    main()
