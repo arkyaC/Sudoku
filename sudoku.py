@@ -6,9 +6,17 @@ Date of Creation: 3rd April 2k16
 
 import pygame,sys,random,time
 from pygame.locals import *
+from copy import deepcopy
 
 WINDOWHEIGHT = 500
 WINDOWWIDTH = 500
+BOXSIZE = 50
+LEFTMARGIN = 25
+TOPMARGIN = 20
+BOXMARGIN = 2
+BOXEFF = BOXSIZE-2*BOXMARGIN
+
+FPS = 30
 
 #            R    G    B
 GRAY     = (100, 100, 100)
@@ -23,73 +31,88 @@ PURPLE   = (255,   0, 255)
 CYAN     = (  0, 255, 255)
 BLACK    = (  0,   0,   0)
 
-BOXCOLOUR = GRAY
+BOXCOLOUR = GREEN
 HIGHLIGHT = CYAN
-CLICKED = BLUE
+CLICKED = GREEN
 BGCOLOUR = NAVYBLUE
 TEXTCOLOUR = BLACK
 
+pygame.init()
 
-def main():
+DISPLAYSURF=pygame.display.set_mode((WINDOWHEIGHT,WINDOWWIDTH))
+FPSCLOCK=pygame.time.Clock()
+pygame.display.set_caption('Sudoku Masters')
+
+#Font
+smallFont=pygame.font.Font('./arial.ttf',16)
+largeFont=pygame.font.Font('./arial.ttf',28)
+largeFont.set_italic(True)
+
+
+def first():
 	global FPSCLOCK, DISPLAYSURF
-	pygame.init()
-	FPSCLOCK=pygame.time.Clock()
-	DISPLAYSURF=pygame.display.set_mode((WINDOWHEIGHT,WINDOWWIDTH))
-	pygame.display.set_caption('Sudoku Masters')
+	
 	global smallFont
-	smallFont=pygame.font.Font('./arial.ttf',16)
+	
 	global largeFont
-	largeFont=pygame.font.Font('./arial.ttf',28)
-	largeFont.set_italic(True)
 	print 'init done'
 
 
-	welcomeScr()
+	#welcomeScr()
 
 	mousex = 0
 	mousey = 0
-	board = [[0 for x in range(9)] for x in range(9)]
-	#print board
-	x=fillUp(board)
-	printBoard(board)
-	print 'filled up'
 
-	displayedBoard = board
-	makeSpaces(displayedBoard,board)
+
+
+	board = [[0 for x in range(9)] for x in range(9)]
+	fillUp(board)
+	printBoard(board)
+	#print 'filled up'
+
+	displayedBoard = deepcopy(board)
+	#makeSpaces(displayedBoard,board)
+	displayedBoard[0][0]=0
 	printBoard( displayedBoard)
+	printBoard(board)
 	print "stage 1 complete"
 
-	#welcomeScr()
-
-	DISPLAYSURF.fill(BGCOLOUR)
 	
-	#textSurfaceObj=fontObj.render('Welcome to Sudoku Masters!',True,(0,0,0))
-	#textRectObj=textSurfaceObj.get_rect()
-	#textRectObj.center=(200,150)
+	welcomeScr()
+	DISPLAYSURF.fill(BGCOLOUR)
 
 	while True:
-		mouseClicked = False
+		#mouseClicked = False
+		#print 1
+		DISPLAYSURF.fill(BGCOLOUR) # drawing the window
+		displayCurrent(displayedBoard)
+		#displayCurrent(board)
 
-        DISPLAYSURF.fill(BGCOLOUR) # drawing the window
-        
+		for event in pygame.event.get():
 
-        for event in pygame.event.get():
-	        if event.type == QUIT:
-	            pygame.quit()
-	            sys.exit()
-
+			if event.type == QUIT:
+				pygame.quit()
+				sys.exit()
+			
+			elif event.type==MOUSEMOTION:
+				mousex,mousey=event.pos
+			elif event.type==MOUSEBUTTONUP:
+				mousex,mousey=event.pos
+				mouseClicked=True
+		pygame.display.update()
+		FPSCLOCK.tick(FPS)
 
 
 def fillUp(board):
-	pos = [0,0]
-	if not findUnassigned(board,pos):
+	box = [0,0]
+	if not findUnassigned(board,box):
 		return True
 	for i in range(1,10):
-		if(isSafe(board,pos[0],pos[1],i)):
-			board[pos[0]][pos[1]]=i
+		if(isSafe(board,box[0],box[1],i)):
+			board[box[0]][box[1]]=i
 			if(fillUp(board)): #solvable
 				return True
-			board[pos[0]][pos[1]]=0
+			board[box[0]][box[1]]=0
 	return False #backtrack
 
 def isSafe(board,row,col,num):
@@ -142,12 +165,12 @@ def unique(displayedBoard):
 	return True
 
 
-def findUnassigned(board,pos):
+def findUnassigned(board,box):
 	for i in range (9):
 		for j in range(9):
 			if board[i][j]==0:
-				pos[0]=i
-				pos[1]=j
+				box[0]=i
+				box[1]=j
 				return True
 	return False
 	
@@ -169,9 +192,24 @@ def welcomeScr():
 	DISPLAYSURF.fill(BGCOLOUR)
 	pygame.display.update()
 
+def displayCurrent(board):
+	for row in range(9):
+		for col in range(9):
+			if board[row][col]!=0:
+				pygame.draw.rect(DISPLAYSURF,CLICKED,(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row,BOXEFF,BOXEFF))
+				data=smallFont.render(str(board[row][col]),True,TEXTCOLOUR)
+				dataRect=data.get_rect()
+				dataRect.topleft=(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row)
+				DISPLAYSURF.blit(data,dataRect)
+			else:
+				pygame.draw.rect(DISPLAYSURF,BOXCOLOUR,(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row,BOXEFF,BOXEFF))
+
+	pygame.display.update()
+
 def printBoard(board):
 	for i in range(0,9):
 		print board[i]
 
-if __name__ == '__main__':
-    main()
+'''if __name__ == '__main__':
+    main()'''
+first()
