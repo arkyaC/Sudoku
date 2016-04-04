@@ -14,7 +14,7 @@ BOXSIZE = 50
 LEFTMARGIN = 25
 TOPMARGIN = 20
 BOXMARGIN = 2
-BOXEFF = BOXSIZE-2*BOXMARGIN
+BOXEFF = BOXSIZE - 2*BOXMARGIN
 
 FPS = 30
 
@@ -37,6 +37,7 @@ CLICKED = BLUE
 BGCOLOUR = NAVYBLUE
 TEXTCOLOUR = BLACK
 ORIGINAL = (128, 128, 255)
+LINECOLOUR = ORANGE
 
 pygame.init()
 
@@ -50,16 +51,8 @@ largeFont=pygame.font.Font('./arial.ttf',28)
 largeFont.set_italic(True)
 
 
+
 def main():
-	#global FPSCLOCK, DISPLAYSURF
-	
-	#global smallFont
-	
-	#global largeFont
-	print 'init done'
-
-
-	#welcomeScr()
 
 	mousex = 0
 	mousey = 0
@@ -68,20 +61,29 @@ def main():
 
 	board = [[0 for x in range(9)] for x in range(9)]
 	fillUp(board)
-	printBoard(board)
+
+
+	displayedBoard = [[0 for x in range(9)] for x in range(9)]
+	originalBoard = [[0 for x in range(9)] for x in range(9)]
+	for i in range(9):
+		for j in range(9):
+			displayedBoard[i][j]=board[i][j]
+
+	#printBoard(board)
 	#print 'filled up'
 
-	displayedBoard = deepcopy(board)
-	makeSpaces(displayedBoard,board)
-	originalBoard = deepcopy(displayedBoard)
-	#displayedBoard[0][0]=0
-	printBoard( displayedBoard)
-	printBoard(board)
-	#print "stage 1 complete"
 
+	#displayedBoard = deepcopy(board)
+	makeSpaces(displayedBoard,board)
+	#originalBoard = deepcopy(displayedBoard)
 	
+	for i in range(9):
+		for j in range(9):
+			originalBoard[i][j]=displayedBoard[i][j]
+
 	welcomeScr()
 	DISPLAYSURF.fill(BGCOLOUR)
+	smallFont.set_bold(True)
 
 	while True:
 		mouseClicked = False
@@ -98,17 +100,19 @@ def main():
 			
 			elif event.type==MOUSEMOTION:
 				mousex,mousey=event.pos
+				#print 1
 			elif event.type==MOUSEBUTTONUP:
 				mousex,mousey=event.pos
 				mouseClicked=True
+				#print 2
 
 		row,col = getBoxAtPixel(mousex,mousey)
-
+		#print row,col
 		if row!=None and col!=None:
 			if displayedBoard[row][col]==0:
 				highLight(row,col,displayedBoard,originalBoard)
 			if mouseClicked==True:
-				print 1
+				print 100
 		pygame.display.update()
 		FPSCLOCK.tick(FPS)
 
@@ -143,14 +147,17 @@ def makeSpaces(displayedBoard,board):
 		print ctr
 		for i in range(0,9):
 			a=random.randint(0,8)
+			#print a
 			while displayedBoard[i][a]==0:
 				a=random.randint(0,8)
 			displayedBoard[i][a]=0
+			printBoard(displayedBoard)
 			ctr+=1
+			#print unique(displayedBoard)
 			if not unique(displayedBoard):
 				displayedBoard[i][a]=board[i][a]
 				ctr-=1
-				print 1
+				#print 1
 		for i in range(0,9):
 			a=random.randint(0,8)
 			while displayedBoard[a][i]==0:
@@ -162,30 +169,63 @@ def makeSpaces(displayedBoard,board):
 				ctr-=1
 
 def unique(displayedBoard):
-	testBoard=displayedBoard
+	
+	testBoard = [[0 for x in range(9)] for x in range(9)]
+	for i in range(9):
+		for j in range(9):
+			testBoard[i][j]=displayedBoard[i][j]
 	if not fillUp(testBoard):
 		return False
-		#print 1
-	board1=displayedBoard
-	board2=displayedBoard
+	
+
+	board1 = [[0 for x in range(9)] for x in range(9)]
+	for i in range(9):
+		for j in range(9):
+			board1[i][j]=displayedBoard[i][j]
+
+	board2 = [[0 for x in range(9)] for x in range(9)]
+	for i in range(9):
+		for j in range(9):
+			board2[i][j]=displayedBoard[i][j]
+
 	fillUp(board1)
 	fillUp(board2)
-	for i in range(0,8):
-		for j in range(0,8):
+	for i in range(0,9):
+		for j in range(0,9):
 			if board1[i][j]!=board2[i][j]:
 				return False
 	return True
 
 
-def findUnassigned(board,box):
+'''def findUnassigned(board,box):
 	for i in range (9):
 		for j in range(9):
 			if board[i][j]==0:
 				box[0]=i
 				box[1]=j
 				return True
-	return False
-	
+	return False'''
+
+def findUnassigned(board,box):
+	unassigned=[]
+	for i in range (9):
+		for j in range(9):
+			if board[i][j]==0:
+				unassigned.append([i,j])
+				if len(unassigned)>1:
+					break
+		else:
+			continue
+		break
+	print unassigned
+	if len(unassigned)==0:
+		return False
+	else:
+		random.shuffle(unassigned)
+		box[0]=unassigned[0][0]
+		box[1]=unassigned[0][1]
+		return True
+
 def welcomeScr():
 	DISPLAYSURF.fill(BGCOLOUR)
 	welcomeMessage=largeFont.render('Welcome to Sudoku Masters',True,WHITE)
@@ -223,12 +263,13 @@ def displayCurrent(board,originalBoard):
 		width=2
 		if row==2 or row==5:
 			width=4
-		pygame.draw.line(DISPLAYSURF,PURPLE,(LEFTMARGIN,TOPMARGIN+(row+1)*BOXSIZE),(WINDOWWIDTH-LEFTMARGIN,TOPMARGIN+(row+1)*BOXSIZE),width)
-	for col in range(9):
+		pygame.draw.line(DISPLAYSURF,LINECOLOUR,(LEFTMARGIN,TOPMARGIN+(row+1)*BOXSIZE),(WINDOWWIDTH-LEFTMARGIN,TOPMARGIN+(row+1)*BOXSIZE),width)
+	for col in range(8):
 		width=2
 		if col==2 or col==5:
 			width=4
-		pygame.draw.line(DISPLAYSURF,PURPLE,(LEFTMARGIN+(col+1)*BOXSIZE,TOPMARGIN),(LEFTMARGIN+(col+1)*BOXSIZE,WINDOWHEIGHT-TOPMARGIN),width)
+		pygame.draw.line(DISPLAYSURF,LINECOLOUR,(LEFTMARGIN+(col+1)*BOXSIZE,TOPMARGIN),(LEFTMARGIN+(col+1)*BOXSIZE,TOPMARGIN+9*BOXSIZE),width)
+	pygame.draw.rect(DISPLAYSURF,LINECOLOUR,(LEFTMARGIN,TOPMARGIN,BOXSIZE*9,BOXSIZE*9),4)
 	pygame.display.update()
 
 def leftTopCoordsOfBox(boxx, boxy):
@@ -237,17 +278,20 @@ def leftTopCoordsOfBox(boxx, boxy):
 	return (left,top)
 
 def getBoxAtPixel(x,y):
-	for row in range(9):
-		for col in range(9):
+	for row in range(0,9):
+		for col in range(0,9):
 			left, top = leftTopCoordsOfBox(col, row)
-        	boxRect = pygame.Rect(left,top,BOXEFF,BOXEFF)
-        	if boxRect.collidepoint(x, y):
-        	    return (row, col)
+	   		boxRect = pygame.Rect(left,top,BOXEFF,BOXEFF)
+	   		#print left,top
+	   		if boxRect.collidepoint(x, y):
+	   		    #print 'found box'
+	   			return (row, col)
 	return (None,None)
 
 def highLight(row,col,displayedBoard,originalBoard):
 	#pygame.draw.rect(DISPLAYSURF,HIGHLIGHT,(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row,BOXEFF,BOXEFF))
 	if originalBoard[row][col]!=0:
+		#print 1
 		return
 	currBox=pygame.Rect(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row,BOXEFF,BOXEFF)
 	pygame.draw.rect(DISPLAYSURF,HIGHLIGHT,currBox)
