@@ -53,84 +53,83 @@ largeFont.set_italic(True)
 
 
 def main():
-
-	mousex = 0
-	mousey = 0
-
-
-
-	board = [[0 for x in range(9)] for x in range(9)]
-	fillUp(board)
-
-
-	displayedBoard = [[0 for x in range(9)] for x in range(9)]
-	originalBoard = [[0 for x in range(9)] for x in range(9)]
-	for i in range(9):
-		for j in range(9):
-			displayedBoard[i][j]=board[i][j]
-	
-	makeSpaces(displayedBoard,board)
-
-	for i in range(9):
-		for j in range(9):
-			originalBoard[i][j]=displayedBoard[i][j]
-
-	welcomeScr()
-	DISPLAYSURF.fill(BGCOLOUR)
-	smallFont.set_bold(True)
-	keyPressed = None
 	while True:
-		
-		mouseClicked = False
-		
-		DISPLAYSURF.fill(BGCOLOUR) # drawing the window
-		displayCurrent(displayedBoard,originalBoard)
+		smallFont.set_bold(False)
+		welcomeScr()
+		DISPLAYSURF.fill(BGCOLOUR)
+		smallFont.set_bold(True)
 
-		for event in pygame.event.get():
+		mousex = 0
+		mousey = 0
+		board = [[0 for x in range(9)] for x in range(9)]
+		fillUp(board)
 
-			if event.type == QUIT:
-				pygame.quit()
-				sys.exit()
+		displayedBoard = [[0 for x in range(9)] for x in range(9)]
+		originalBoard = [[0 for x in range(9)] for x in range(9)]
+		for i in range(9):
+			for j in range(9):
+				displayedBoard[i][j]=board[i][j]
+		
+		makeSpaces(displayedBoard,board) #make spaces in the board for player to fill in
+
+		for i in range(9):
+			for j in range(9):
+				originalBoard[i][j]=displayedBoard[i][j]
+
+		keyPressed = None
+
+		while True:#main game loop
 			
-			elif event.type==MOUSEMOTION:
-				mousex,mousey=event.pos
-				#print 1
-			elif event.type==MOUSEBUTTONUP:
-				mousex,mousey=event.pos
-				mouseClicked=True
-			elif event.type==KEYUP:
-				keyPressed=event.key
+			mouseClicked = False
+			
+			DISPLAYSURF.fill(BGCOLOUR) # drawing the window
+			displayCurrent(displayedBoard,originalBoard)
 
-		row,col = getBoxAtPixel(mousex,mousey)
-		#print row,col
-		if row!=None and col!=None:
-			if originalBoard[row][col]==0:
-				highLight(row,col,displayedBoard,originalBoard)
-			if mouseClicked==True:
+			for event in pygame.event.get():
+
+				if event.type == QUIT:
+					pygame.quit()
+					sys.exit()
+				
+				elif event.type==MOUSEMOTION:
+					mousex,mousey=event.pos
+					
+				elif event.type==MOUSEBUTTONUP:
+					mousex,mousey=event.pos
+					mouseClicked=True
+				elif event.type==KEYUP:
+					keyPressed=event.key
+
+			row,col = getBoxAtPixel(mousex,mousey)#extract info about mouse position
+			
+			if row!=None and col!=None:
 				if originalBoard[row][col]==0:
-					displayedBoard[row][col]='?'
-		if keyPressed!=None:
-			for i in range(9):
-				for j in range(9):
-					if displayedBoard[i][j]=='?':
-						displayedBoard[i][j]=pressedKey(keyPressed)
-						keyPressed=None
-						break
+					highLight(row,col,displayedBoard,originalBoard)
+				if mouseClicked==True:
+					if originalBoard[row][col]==0:
+						displayedBoard[row][col]='?'
+			if keyPressed!=None:
+				for i in range(9):
+					for j in range(9):
+						if displayedBoard[i][j]=='?':
+							displayedBoard[i][j]=pressedKey(keyPressed)
+							keyPressed=None
+							break
+					else:
+						continue
+					break
+			if hasWon(displayedBoard):#check for win
+				
+				res=endScreen()
+				if not res:
+					pygame.quit()
+					sys.exit()
 				else:
-					continue
-				break
-		'''if hasWon(displayedBoard):
-			res=endScreen()
-			if res:
-				pygame.quit()
-				sys.exit()
-			else:
-				print 'again' #need to put entire code in main() in a while loop
-		'''
+					break #restart game
+			
+			pygame.display.update()
+			FPSCLOCK.tick(FPS)
 
-		#fillUp(displayedBoard)
-		pygame.display.update()
-		FPSCLOCK.tick(FPS)
 
 def pressedKey(keyPr):
 	if keyPr==K_1:
@@ -183,17 +182,17 @@ def makeSpaces(displayedBoard,board):
 	while ctr<50: #make 50 empty cells
 		for i in range(0,9):
 			a=random.randint(0,8)
-			#print a
+			
 			while displayedBoard[i][a]==0:
 				a=random.randint(0,8)
 			displayedBoard[i][a]=0
-			#printBoard(displayedBoard)
+			
 			ctr+=1
-			#print unique(displayedBoard)
+			
 			if not unique(displayedBoard):
 				displayedBoard[i][a]=board[i][a]
 				ctr-=1
-				#print 1
+				
 		for i in range(0,9):
 			a=random.randint(0,8)
 			while displayedBoard[a][i]==0:
@@ -213,23 +212,23 @@ def unique(displayedBoard):
 	if not fillUp(testBoard):
 		return False
 	
+	for asdf in range(4):
+		board1 = [[0 for x in range(9)] for x in range(9)]
+		for i in range(9):
+			for j in range(9):
+				board1[i][j]=displayedBoard[i][j]
 
-	board1 = [[0 for x in range(9)] for x in range(9)]
-	for i in range(9):
-		for j in range(9):
-			board1[i][j]=displayedBoard[i][j]
+		board2 = [[0 for x in range(9)] for x in range(9)]
+		for i in range(9):
+			for j in range(9):
+				board2[i][j]=displayedBoard[i][j]
 
-	board2 = [[0 for x in range(9)] for x in range(9)]
-	for i in range(9):
-		for j in range(9):
-			board2[i][j]=displayedBoard[i][j]
-
-	fillUp(board1)
-	fillUp(board2)
-	for i in range(0,9):
-		for j in range(0,9):
-			if board1[i][j]!=board2[i][j]:
-				return False
+		fillUp(board1)
+		fillUp(board2)
+		for i in range(0,9):
+			for j in range(0,9):
+				if board1[i][j]!=board2[i][j]:
+					return False
 	return True
 
 def findUnassigned(board,box):
@@ -243,7 +242,7 @@ def findUnassigned(board,box):
 		else:
 			continue
 		break
-	#print unassigned
+	
 	if len(unassigned)==0:
 		return False
 	else:
@@ -308,16 +307,14 @@ def getBoxAtPixel(x,y):
 		for col in range(0,9):
 			left, top = leftTopCoordsOfBox(col, row)
 	   		boxRect = pygame.Rect(left,top,BOXEFF,BOXEFF)
-	   		#print left,top
+	   		
 	   		if boxRect.collidepoint(x, y):
-	   		    #print 'found box'
 	   			return (row, col)
 	return (None,None)
 
 def highLight(row,col,displayedBoard,originalBoard):
-	#pygame.draw.rect(DISPLAYSURF,HIGHLIGHT,(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row,BOXEFF,BOXEFF))
+	
 	if originalBoard[row][col]!=0:
-		#print 1
 		return
 	currBox=pygame.Rect(LEFTMARGIN+BOXMARGIN+BOXSIZE*col,TOPMARGIN+BOXMARGIN+BOXSIZE*row,BOXEFF,BOXEFF)
 	pygame.draw.rect(DISPLAYSURF,HIGHLIGHT,currBox)
@@ -328,56 +325,55 @@ def highLight(row,col,displayedBoard,originalBoard):
 	dataRect.center=currBox.center
 	DISPLAYSURF.blit(data,dataRect)
 
-def hasWon(displayedBoard):
+def hasWon(sud):
 	for i in range(9):
 		for j in range(9):
-			if displayedBoard[i][j]==0:
+			if sud[i][j]==0:
 				return False
-	for i in range(9):
-		for j in range(9):
-			num=displayedBoard[i][j]
-			for k in range(9):
-				if displayedBoard[i][k]==num and k!=j:
-					return False
-			for k in range(9):
-				if displayedBoard[k][i]==num and k!=i:
-					return False
-			for k in range (i/3*3,i/3*3+3):
-				for l in range (j/3*3,j/3*3+3):
-					if displayedBoard[k][l]==num and k!=i and l!=j:
-						return False
+	zippedsud = zip(*sud)
+
+	boxedsud=[]
+	for li,line in enumerate(sud):
+	    for box in range(3):
+	        if not li % 3: boxedsud.append([])    # build a new box every 3 lines
+	        boxedsud[box + li/3*3].extend(line[box*3:box*3+3])
+
+	for li in range(9):
+	    if [x for x in [set(sud[li]), set(zippedsud[li]), set(boxedsud[li])] if x != set(range(1,10))]:
+	        return False
 	return True
 
 def endScreen():
-	print 'to print end screen now'
-	queryBox=pygame.Rect(WINDOWWIDTH/2-100,WINDOWHEIGHT/2-120,200,200)
+	
+	queryBox=pygame.Rect(WINDOWWIDTH/2-150,WINDOWHEIGHT/2-120,300,200)
 	queryMsg=largeFont.render("!! YOU WON !!",True,RED)
-	msgRect=data.get_rect()
-	msgRect.center=currBox.center
+	msgRect=queryMsg.get_rect()
+	msgRect.center=queryBox.center
 	pygame.draw.rect(DISPLAYSURF,YELLOW,queryBox)
+	pygame.draw.rect(DISPLAYSURF,ORANGE,queryBox,3)
 	DISPLAYSURF.blit(queryMsg,msgRect)
 	pygame.display.update()
 	time.sleep(2)
 	while True:
-		queryBox=pygame.Rect(WINDOWWIDTH/2-100,WINDOWHEIGHT/2-120,200,200)
-		queryMsg=largeFont.render("PLAY AGAIN? (Y/N)",True,WHITE)
-		msgRect=data.get_rect()
-		msgRect.center=currBox.center
+		queryBox=pygame.Rect(WINDOWWIDTH/2-150,WINDOWHEIGHT/2-120,300,200)
+		queryMsg=largeFont.render("PLAY AGAIN? (Y/N)",True,RED)
+		msgRect=queryMsg.get_rect()
+		msgRect.center=queryBox.center
 		pygame.draw.rect(DISPLAYSURF,YELLOW,queryBox)
+		pygame.draw.rect(DISPLAYSURF,ORANGE,queryBox,3)
 		DISPLAYSURF.blit(queryMsg,msgRect)
 		for event in pygame.event.get():
+			if event.type==QUIT:
+				pygame.quit()
+				sys.exit()
 			if event.type==KEYUP:
-				if event.key==K_y or event.key==K_Y:
+				if event.key==K_y:
 					return True
-				elif event.key==K_n or event.key==K_N:
+				elif event.key==K_n:
 					return False
 		pygame.display.update()
 		FPSCLOCK.tick(FPS)
 
-
-def printBoard(board):
-	for i in range(0,9):
-		print board[i]
 
 if __name__ == '__main__':
     main()
