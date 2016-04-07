@@ -108,16 +108,17 @@ def main():
 				if mouseClicked==True:
 					if originalBoard[row][col]==0:
 						displayedBoard[row][col]='?'
-			if keyPressed!=None:
-				for i in range(9):
-					for j in range(9):
-						if displayedBoard[i][j]=='?':
-							displayedBoard[i][j]=pressedKey(keyPressed)
-							keyPressed=None
+					if keyPressed!=None:
+						for i in range(9):
+							for j in range(9):
+								if displayedBoard[i][j]=='?':
+									displayedBoard[i][j]=pressedKey(keyPressed)
+									keyPressed=None
+									break
+							else:
+								continue
 							break
-					else:
-						continue
-					break
+			pygame.display.update()
 			if hasWon(displayedBoard):#check for win
 				
 				res=endScreen()
