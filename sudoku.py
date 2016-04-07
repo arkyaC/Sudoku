@@ -77,6 +77,7 @@ def main():
 				originalBoard[i][j]=displayedBoard[i][j]
 
 		keyPressed = None
+		clickedPrev = False
 
 		while True:#main game loop
 			
@@ -97,6 +98,7 @@ def main():
 				elif event.type==MOUSEBUTTONUP:
 					mousex,mousey=event.pos
 					mouseClicked=True
+					clickedPrev=True
 				elif event.type==KEYUP:
 					keyPressed=event.key
 
@@ -108,16 +110,17 @@ def main():
 				if mouseClicked==True:
 					if originalBoard[row][col]==0:
 						displayedBoard[row][col]='?'
-					if keyPressed!=None:
-						for i in range(9):
-							for j in range(9):
-								if displayedBoard[i][j]=='?':
-									displayedBoard[i][j]=pressedKey(keyPressed)
-									keyPressed=None
-									break
-							else:
-								continue
+			if keyPressed!=None && clickedPrev:
+				clickedPrev=False
+				for i in range(9):
+					for j in range(9):
+						if displayedBoard[i][j]=='?':
+							displayedBoard[i][j]=pressedKey(keyPressed)
+							keyPressed=None
 							break
+					else:
+						continue
+					break
 			pygame.display.update()
 			if hasWon(displayedBoard):#check for win
 				
