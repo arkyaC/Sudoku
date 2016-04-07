@@ -110,7 +110,7 @@ def main():
 				if mouseClicked==True:
 					if originalBoard[row][col]==0:
 						displayedBoard[row][col]='?'
-			if keyPressed!=None && clickedPrev:
+			if keyPressed!=None and clickedPrev:
 				clickedPrev=False
 				for i in range(9):
 					for j in range(9):
