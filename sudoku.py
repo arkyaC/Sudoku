@@ -212,7 +212,7 @@ def unique(displayedBoard):
 	if not fillUp(testBoard):
 		return False
 	
-	for asdf in range(4):
+	for asdf in range(10):#changed to 10 from 4
 		board1 = [[0 for x in range(9)] for x in range(9)]
 		for i in range(9):
 			for j in range(9):
