@@ -56,6 +56,8 @@ def main():
 	while True:
 		smallFont.set_bold(False)
 		welcomeScr()
+		pygame.mixer.music.load('./intro.mp3')
+		pygame.mixer.music.play(-1,0.0)
 		DISPLAYSURF.fill(BGCOLOUR)
 		smallFont.set_bold(True)
 
@@ -95,11 +97,11 @@ def main():
 				elif event.type==MOUSEMOTION:
 					mousex,mousey=event.pos
 					
-				elif event.type==MOUSEBUTTONUP:
+				elif event.type==MOUSEBUTTONUP and not clickedPrev:
 					mousex,mousey=event.pos
 					mouseClicked=True
 					clickedPrev=True
-				elif event.type==KEYUP:
+				elif event.type==KEYUP and clickedPrev:
 					keyPressed=event.key
 
 			row,col = getBoxAtPixel(mousex,mousey)#extract info about mouse position
@@ -110,7 +112,7 @@ def main():
 				if mouseClicked==True:
 					if originalBoard[row][col]==0:
 						displayedBoard[row][col]='?'
-			if keyPressed!=None and clickedPrev:
+			if keyPressed!=None:
 				clickedPrev=False
 				for i in range(9):
 					for j in range(9):
@@ -123,7 +125,7 @@ def main():
 					break
 			pygame.display.update()
 			if hasWon(displayedBoard):#check for win
-				
+				pygame.mixer.music.stop()
 				res=endScreen()
 				if not res:
 					pygame.quit()
@@ -348,7 +350,8 @@ def hasWon(sud):
 	return True
 
 def endScreen():
-	
+	pygame.mixer.music.load('./game_over.mp3')
+	pygame.mixer.music.play(-1,0.0)
 	queryBox=pygame.Rect(WINDOWWIDTH/2-150,WINDOWHEIGHT/2-120,300,200)
 	queryMsg=largeFont.render("!! YOU WON !!",True,RED)
 	msgRect=queryMsg.get_rect()
@@ -372,8 +375,10 @@ def endScreen():
 				sys.exit()
 			if event.type==KEYUP:
 				if event.key==K_y:
+					pygame.mixer.music.stop()
 					return True
 				elif event.key==K_n:
+					pygame.mixer.music.stop()
 					return False
 		pygame.display.update()
 		FPSCLOCK.tick(FPS)
